@@ -27,9 +27,9 @@ if config.config_file_name is not None:
     fileConfig(config.config_file_name)
 
 # Import all models for autogenerate support
-from backend.database.config import Base
-import backend.models.hcp  # noqa: F401
-import backend.models.interaction  # noqa: F401
+from database.config import Base
+import models.hcp  # noqa: F401
+import models.interaction  # noqa: F401
 
 target_metadata = Base.metadata
 

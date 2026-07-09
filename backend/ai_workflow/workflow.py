@@ -19,7 +19,7 @@ from langgraph.graph import StateGraph, END
 from langchain_groq import ChatGroq
 from langchain_core.messages import HumanMessage, SystemMessage
 
-from backend.prompts.extraction_prompt import SYSTEM_PROMPT, USER_MESSAGE_TEMPLATE
+from prompts.extraction_prompt import SYSTEM_PROMPT, USER_MESSAGE_TEMPLATE
 
 logger = logging.getLogger(__name__)
 

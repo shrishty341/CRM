@@ -11,8 +11,8 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-from backend.api.routes import router
-from backend.database.config import init_db
+from api.routes import router
+from database.config import init_db
 
 load_dotenv()
 
@@ -155,7 +155,7 @@ if __name__ == "__main__":
 
     logger.info(f"Starting server on {host}:{port} (debug={debug})")
     uvicorn.run(
-        "backend.main:app",
+        "main:app",
         host=host,
         port=port,
         reload=debug,

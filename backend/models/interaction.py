@@ -7,7 +7,7 @@ from sqlalchemy import (
     Column, Integer, String, Text, DateTime, ForeignKey, JSON
 )
 from sqlalchemy.orm import relationship
-from backend.database.config import Base
+from database.config import Base
 
 
 class Interaction(Base):

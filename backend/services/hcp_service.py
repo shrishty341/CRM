@@ -5,8 +5,8 @@ Handles all business logic for Healthcare Professional operations.
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 from sqlalchemy import or_
-from backend.models.hcp import HCP
-from backend.schemas.hcp import HCPCreateSchema
+from models.hcp import HCP
+from schemas.hcp import HCPCreateSchema
 
 
 class HCPService:

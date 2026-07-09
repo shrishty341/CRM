@@ -7,18 +7,18 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.orm import Session
 
-from backend.database.config import get_db
-from backend.schemas.chat import ChatRequestSchema, ChatResponseSchema, AIExtractedData
-from backend.schemas.interaction import (
+from database.config import get_db
+from schemas.chat import ChatRequestSchema, ChatResponseSchema, AIExtractedData
+from schemas.interaction import (
     InteractionCreateSchema,
     InteractionResponseSchema,
     InteractionSchema,
     InteractionHistorySchema,
 )
-from backend.schemas.hcp import HCPSchema, HCPSearchSchema
-from backend.services.hcp_service import HCPService
-from backend.services.interaction_service import InteractionService
-from backend.langgraph.workflow import HCPExtractionWorkflow
+from schemas.hcp import HCPSchema, HCPSearchSchema
+from services.hcp_service import HCPService
+from services.interaction_service import InteractionService
+from ai_workflow.workflow import HCPExtractionWorkflow
 
 logger = logging.getLogger(__name__)
 

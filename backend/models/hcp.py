@@ -5,7 +5,7 @@ Represents a doctor or healthcare provider in the CRM system.
 from datetime import datetime
 from sqlalchemy import Column, Integer, String, DateTime
 from sqlalchemy.orm import relationship
-from backend.database.config import Base
+from database.config import Base
 
 
 class HCP(Base):

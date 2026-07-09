@@ -6,11 +6,11 @@ from datetime import datetime
 from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc
-from backend.models.hcp import HCP
-from backend.models.interaction import Interaction
-from backend.schemas.interaction import InteractionCreateSchema
-from backend.schemas.hcp import HCPCreateSchema
-from backend.services.hcp_service import HCPService
+from models.hcp import HCP
+from models.interaction import Interaction
+from schemas.interaction import InteractionCreateSchema
+from schemas.hcp import HCPCreateSchema
+from services.hcp_service import HCPService
 
 
 class InteractionService:
