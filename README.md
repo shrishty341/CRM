@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # Pharma CRM - HCP Interaction Module
 
 An AI-powered Healthcare CRM module for pharmaceutical field representatives to log interactions with Healthcare Professionals (Doctors).
@@ -453,3 +454,7 @@ MIT License - see LICENSE file for details.
 - Groq for high-performance LLM inference
 - Material UI for the component library
 - FastAPI for the async Python backend
+=======
+# CRM
+this app is for project use only
+>>>>>>> b7de9c8518d034b049dbe4eff4bc95bee16b3362
