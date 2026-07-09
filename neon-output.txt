@@ -1,0 +1,3 @@
+[?25l[36m?[39m [1mWhat organization would you like to use?[22m [90m»[39m [90m- Use arrow-keys. Return to submit.[39m
+[36m>[39m   [36m[4mShrishty (org-frosty-brook-43841280)[39m[24m[90m[39m
+^C
