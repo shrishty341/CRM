@@ -1,460 +1,228 @@
-<<<<<<< HEAD
-# Pharma CRM - HCP Interaction Module
+# Pharma CRM HCP - Production Deployment Guide
 
-An AI-powered Healthcare CRM module for pharmaceutical field representatives to log interactions with Healthcare Professionals (Doctors).
+## Overview
+This is a FastAPI + React application for pharmaceutical CRM (Customer Relationship Management) for Healthcare Professionals (HCP). The app is configured for deployment on Render.com.
 
-## 🏗 Architecture
+## Architecture
+- **Backend**: FastAPI (Python 3.12) with PostgreSQL database
+- **Frontend**: React + Vite + TypeScript
+- **AI**: LangGraph + Groq LLM for natural language processing
+- **Database**: PostgreSQL (NeonDB on Render)
 
+## Production Configuration Files
+
+### 1. `render.yaml`
+Main deployment configuration for Render.com:
+- Backend API service (Python 3.12)
+- Frontend static site
+- PostgreSQL database
+
+### 2. `backend/requirements.txt`
+Python dependencies including:
+- FastAPI + Uvicorn for API
+- SQLAlchemy for database
+- LangChain + Groq for AI features
+- Gunicorn for production server
+
+### 3. `runtime.txt`
+Specifies Python 3.12.4 for Render deployment
+
+### 4. `backend/build.sh`
+Build script that:
+- Installs Python dependencies
+- Runs database migrations with Alembic
+
+### 5. Environment Variables
+
+#### Backend (`backend/.env`)
+```env
+# Database (auto-configured by Render)
+DATABASE_URL=postgresql://...
+
+# AI Configuration
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODEL=gemma2-9b-it
+
+# Security
+SECRET_KEY=your-secret-key-here
+DEBUG=false
+
+# CORS (update with your frontend URL)
+CORS_ORIGINS=https://your-app.onrender.com
+
+# Server
+HOST=0.0.0.0
+PORT=8000
+LOG_LEVEL=INFO
 ```
-┌─────────────────────────────────────────────────────────────┐
-│                    Frontend (React + TS)                     │
-│  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌────────────┐  │
-│  │ Dashboard │  │ AI Chat  │  │  Form    │  │  History   │  │
-│  └──────────┘  └──────────┘  └──────────┘  └────────────┘  │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Redux Toolkit Store                      │   │
-│  │  ┌──────────┐  ┌──────────┐  ┌──────────┐           │   │
-│  │  │ Chat     │  │Interact. │  │  HCP     │           │   │
-│  │  │ Slice    │  │ Slice    │  │  Slice   │           │   │
-│  │  └──────────┘  └──────────┘  └──────────┘           │   │
-│  └──────────────────────────────────────────────────────┘   │
-│              │ Axios HTTP Client                            │
-└──────────────┼──────────────────────────────────────────────┘
-               │ REST API (JSON)
-┌──────────────┼──────────────────────────────────────────────┐
-│  Backend (FastAPI + Python)                                 │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              API Routes (/api/v1)                     │   │
-│  │  ┌──────┐  ┌──────────┐  ┌──────────┐  ┌─────────┐  │   │
-│  │  │ Chat │  │Interact. │  │  HCP     │  │ Health  │  │   │
-│  │  └──────┘  └──────────┘  └──────────┘  └─────────┘  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │              Service Layer (Repository Pattern)       │   │
-│  │  ┌──────────────────┐  ┌──────────────────────────┐  │   │
-│  │  │   HCPService     │  │   InteractionService     │  │   │
-│  │  └──────────────────┘  └──────────────────────────┘  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │           LangGraph AI Workflow                       │   │
-│  │  ┌──────┐ ┌──────┐ ┌──────┐ ┌──────┐ ┌──────────┐  │   │
-│  │  │Valid.│ │Ctx   │ │Prompt│ │Groq  │ │Validate  │  │   │
-│  │  │Input │ │Build │ │Build │ │LLM   │ │Extract   │  │   │
-│  │  └──────┘ └──────┘ └──────┘ └──────┘ └──────────┘  │   │
-│  └──────────────────────────────────────────────────────┘   │
-│  ┌──────────────────────────────────────────────────────┐   │
-│  │           SQLAlchemy ORM + PostgreSQL                 │   │
-│  │  ┌──────────┐  ┌──────────┐                          │   │
-│  │  │   HCP    │  │Interact. │                          │   │
-│  │  │  Table   │  │  Table   │                          │   │
-│  │  └──────────┘  └──────────┘                          │   │
-│  └──────────────────────────────────────────────────────┘   │
-└─────────────────────────────────────────────────────────────┘
+
+#### Frontend (`frontend/.env`)
+```env
+VITE_API_BASE_URL=https://your-backend-app.onrender.com/api/v1
 ```
 
-## ✨ Features
+## Deployment Steps on Render
 
-### Core Features
-- **AI Chat Assistant**: Describe interactions naturally, AI extracts structured data using LangGraph + Groq LLM
-- **Manual Form**: Traditional form-based interaction logging
-- **Two-Panel Layout**: Chat on left, form on right (when AI populates data)
-- **Auto-Fill**: AI automatically populates form fields from natural language
-- **Editable AI Output**: Review and edit AI-extracted data before saving
-- **Form Validation**: React Hook Form with validation rules
-- **Doctor Search**: Search and autocomplete for existing doctors
-- **Interaction History**: Paginated table with expandable details
-- **JSON Export**: Export interactions as JSON
-- **Toast Notifications**: Success/error feedback via react-toastify
+### Step 1: Push to GitHub
+```bash
+git add .
+git commit -m "Prepare for production deployment"
+git push origin main
+```
 
-### AI Features
-- **LangGraph Workflow**: Stateful graph-based AI pipeline
-- **Groq LLM Integration**: Powered by gemma2-9b-it (or llama-3.3-70b-versatile)
-- **Smart Extraction**: Extracts doctor name, hospital, specialization, products, samples, sentiment, outcome, follow-up dates
-- **Confidence Scoring**: AI provides confidence score for extracted data
-- **Retry Logic**: Automatic retry on extraction failure
-- **Date Normalization**: Handles relative dates (today, yesterday, next Monday)
+### Step 2: Create PostgreSQL Database on Render
+1. Go to Render Dashboard
+2. Click "New" → "PostgreSQL"
+3. Name: `pharma-crm-db`
+4. Plan: Free (or your preferred plan)
+5. Note the database credentials
 
-### UI/UX Features
-- **Responsive Design**: Works on desktop and mobile
-- **Material UI**: Professional, modern interface
-- **Inter Font**: Clean typography
-- **Dark/Light Mode Ready**: Theme infrastructure in place
-- **Loading States**: Skeleton loaders and progress indicators
-- **Error Handling**: Graceful error display with retry options
-- **Suggested Prompts**: Quick-start templates for common scenarios
+### Step 3: Deploy Backend
+1. Click "New" → "Web Service"
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `pharma-crm-api`
+   - **Runtime**: Python 3
+   - **Build Command**: `cd backend && pip install -r requirements.txt`
+   - **Start Command**: `cd backend && gunicorn main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:$PORT --timeout 120`
+4. Add Environment Variables:
+   - `DATABASE_URL`: (from your PostgreSQL database)
+   - `GROQ_API_KEY`: (your Groq API key)
+   - `SECRET_KEY`: (generate a secure random string)
+   - `DEBUG`: `false`
+   - `CORS_ORIGINS`: `https://your-frontend-app.onrender.com`
+   - `TRUSTED_HOSTS`: `localhost,127.0.0.1,.onrender.com`
+5. Click "Create Web Service"
 
-## 🛠 Tech Stack
+### Step 4: Deploy Frontend
+1. Click "New" → "Static Site"
+2. Connect your GitHub repository
+3. Configure:
+   - **Name**: `pharma-crm-frontend`
+   - **Build Command**: `cd frontend && npm install && npm run build`
+   - **Publish Directory**: `frontend/dist`
+4. Add Environment Variable:
+   - `VITE_API_BASE_URL`: `https://pharma-crm-api.onrender.com/api/v1`
+5. Click "Create Static Site"
 
-### Frontend
-| Technology | Purpose |
-|------------|---------|
-| React 18 | UI Framework |
-| TypeScript | Type Safety |
-| Redux Toolkit | State Management |
-| React Router v6 | Routing |
-| Material UI v5 | Component Library |
-| React Hook Form | Form Management |
-| Axios | HTTP Client |
-| Vite | Build Tool |
-| react-toastify | Notifications |
+### Step 5: Update CORS
+After both services are deployed:
+1. Update backend's `CORS_ORIGINS` with your actual frontend URL
+2. Redeploy the backend service
+
+## Production Features Implemented
+
+### Security
+- ✅ DEBUG disabled in production
+- ✅ SECRET_KEY configured via environment variables
+- ✅ CORS restricted to specific origins
+- ✅ TrustedHostMiddleware enabled
+- ✅ GZip compression for responses
+- ✅ No hardcoded credentials
+
+### Performance
+- ✅ Gunicorn with 4 workers
+- ✅ Uvicorn worker class for async support
+- ✅ Database connection pooling (pool_size=10, max_overflow=20)
+- ✅ GZip compression middleware
+- ✅ Request timeout configuration (120s)
+
+### Database
+- ✅ PostgreSQL with SSL (NeonDB)
+- ✅ SQLAlchemy connection pooling
+- ✅ Alembic migrations configured
+- ✅ Auto-initialization on startup
+
+### Monitoring
+- ✅ Structured logging configured
+- ✅ Health check endpoint (`/api/v1/health`)
+- ✅ Error handlers for 404 and 500
+- ✅ Request logging enabled
+
+## Local Development
 
 ### Backend
-| Technology | Purpose |
-|------------|---------|
-| Python 3.11+ | Runtime |
-| FastAPI | Web Framework |
-| SQLAlchemy 2.0 | ORM |
-| Pydantic v2 | Data Validation |
-| PostgreSQL | Database |
-| Alembic | Migrations |
-| LangGraph | AI Workflow |
-| LangChain | LLM Framework |
-| Groq API | LLM Provider |
-
-### AI/ML
-| Component | Purpose |
-|-----------|---------|
-| LangGraph | State graph workflow |
-| Groq gemma2-9b-it | Text extraction |
-| LangChain | LLM orchestration |
-| Custom Prompts | Domain-specific extraction |
-
-## 📁 Project Structure
-
-```
-CRM(HCP)/
-├── backend/
-│   ├── alembic/              # Database migrations
-│   │   ├── env.py
-│   │   └── script.py.mako
-│   ├── api/
-│   │   └── routes.py         # FastAPI route handlers
-│   ├── database/
-│   │   └── config.py         # SQLAlchemy engine & session
-│   ├── langgraph/
-│   │   └── workflow.py       # LangGraph AI workflow
-│   ├── models/
-│   │   ├── hcp.py            # HCP database model
-│   │   └── interaction.py    # Interaction database model
-│   ├── prompts/
-│   │   └── extraction_prompt.py  # LLM system prompts
-│   ├── schemas/
-│   │   ├── chat.py           # Chat request/response schemas
-│   │   ├── hcp.py            # HCP Pydantic schemas
-│   │   └── interaction.py    # Interaction Pydantic schemas
-│   ├── services/
-│   │   ├── hcp_service.py    # HCP business logic
-│   │   └── interaction_service.py  # Interaction business logic
-│   ├── .env                  # Environment variables
-│   ├── alembic.ini           # Alembic configuration
-│   ├── main.py               # FastAPI application entry
-│   └── requirements.txt      # Python dependencies
-│
-├── frontend/
-│   ├── public/
-│   ├── src/
-│   │   ├── components/
-│   │   │   ├── ChatPanel.tsx       # AI chat interface
-│   │   │   ├── InteractionForm.tsx # Interaction form
-│   │   │   └── Layout.tsx          # App layout with sidebar
-│   │   ├── hooks/
-│   │   │   └── useAppDispatch.ts   # Typed Redux hooks
-│   │   ├── pages/
-│   │   │   ├── Dashboard.tsx       # Main dashboard
-│   │   │   ├── History.tsx         # Interaction history
-│   │   │   └── LogInteraction.tsx  # Log interaction page
-│   │   ├── redux/
-│   │   │   ├── chatSlice.ts        # Chat state management
-│   │   │   ├── hcpSlice.ts         # HCP state management
-│   │   │   ├── interactionSlice.ts # Interaction state management
-│   │   │   └── store.ts            # Redux store configuration
-│   │   ├── services/
-│   │   │   └── api.ts              # Axios API service
-│   │   ├── types/
-│   │   │   └── index.ts            # TypeScript type definitions
-│   │   ├── App.tsx                 # Root component
-│   │   ├── main.tsx                # Entry point
-│   │   ├── theme.ts                # MUI theme configuration
-│   │   └── vite-env.d.ts           # Vite type declarations
-│   ├── .env                        # Frontend environment
-│   ├── index.html                  # HTML template
-│   ├── package.json                # Node dependencies
-│   ├── tsconfig.json               # TypeScript config
-│   └── vite.config.ts              # Vite configuration
-│
-└── README.md
-```
-
-## 🚀 Setup Instructions
-
-### Prerequisites
-- Python 3.11+
-- Node.js 18+
-- PostgreSQL 14+
-- Groq API Key (free at console.groq.com)
-
-### 1. Database Setup
-
 ```bash
-# Create PostgreSQL database
-psql -U postgres
-CREATE DATABASE crm_hcp;
-\q
-```
-
-### 2. Backend Setup
-
-```bash
-# Navigate to backend
 cd backend
-
-# Create virtual environment
 python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-# Install dependencies
+source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
-
-# Configure environment
-# Edit .env file with your Groq API key
-# GROQ_API_KEY=gsk_your_key_here
-
-# Run database migrations
-alembic upgrade head
-
-# Start the server
 python main.py
-# Server runs at http://localhost:8000
-# API docs at http://localhost:8000/docs
 ```
+Backend runs at: http://localhost:8000
+API Docs: http://localhost:8000/docs
 
-### 3. Frontend Setup
-
+### Frontend
 ```bash
-# Navigate to frontend
 cd frontend
-
-# Install dependencies
 npm install
-
-# Start development server
 npm run dev
-# App runs at http://localhost:3000
 ```
+Frontend runs at: http://localhost:3000
 
-## 🔌 API Documentation
+## Environment Variables Reference
 
-### Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| POST | `/api/v1/chat` | Process natural language via AI |
-| POST | `/api/v1/interaction` | Save a new interaction |
-| GET | `/api/v1/interaction/{id}` | Get interaction by ID |
-| GET | `/api/v1/interaction/history` | Get paginated interaction history |
-| GET | `/api/v1/hcp` | List/search HCPs |
-| GET | `/api/v1/hcp/recent` | Get recent HCPs |
-| GET | `/api/v1/hcp/{id}` | Get HCP by ID |
-| GET | `/api/v1/hcp/{id}/interactions` | Get HCP's interactions |
-| GET | `/api/v1/health` | Health check |
-
-### Sample API Responses
-
-#### POST /api/v1/chat
-```json
-{
-  "success": true,
-  "message": "Message processed successfully",
-  "extracted_data": {
-    "doctor_name": "Dr. Rajesh Sharma",
-    "hospital": "Apollo Hospital",
-    "specialization": "Cardiologist",
-    "meeting_date": "2026-07-09",
-    "products_discussed": ["CardioPlus"],
-    "samples_given": 5,
-    "sentiment": "interested",
-    "outcome": "sample_requested",
-    "follow_up_date": "2026-07-16",
-    "summary": "Met with Dr. Rajesh Sharma at Apollo Hospital to discuss CardioPlus. He showed interest and requested 5 samples. Follow-up scheduled for next week.",
-    "confidence_score": 0.92
-  },
-  "raw_response": "{...}",
-  "conversation_id": "conv_1720512673.123456"
-}
-```
-
-#### POST /api/v1/interaction
-```json
-{
-  "success": true,
-  "message": "Interaction saved successfully",
-  "data": {
-    "id": 1,
-    "hcp_id": 1,
-    "doctor_name": "Dr. Rajesh Sharma",
-    "hospital": "Apollo Hospital",
-    "specialization": "Cardiologist",
-    "meeting_date": "2026-07-09T00:00:00",
-    "interaction_type": "in_person",
-    "products_discussed": ["CardioPlus"],
-    "samples_given": 5,
-    "outcome": "sample_requested",
-    "follow_up_date": "2026-07-16T00:00:00",
-    "notes": "Met with Dr. Rajesh Sharma at Apollo Hospital...",
-    "ai_summary": "Met with Dr. Rajesh Sharma at Apollo Hospital...",
-    "created_at": "2026-07-09T12:30:00"
-  }
-}
-```
-
-## 🧪 Testing
-
-### Backend Testing
-```bash
-cd backend
-pytest -v
-```
-
-### Manual Testing with curl
-```bash
-# Test health
-curl http://localhost:8000/api/v1/health
-
-# Test AI chat
-curl -X POST http://localhost:8000/api/v1/chat \
-  -H "Content-Type: application/json" \
-  -d '{"message": "Met with Dr. Sharma at Apollo today. Discussed CardioPlus. He was interested and took 3 samples."}'
-
-# Test save interaction
-curl -X POST http://localhost:8000/api/v1/interaction \
-  -H "Content-Type: application/json" \
-  -d '{
-    "doctor_name": "Dr. Test",
-    "hospital": "Test Hospital",
-    "meeting_date": "2026-07-09T10:00:00",
-    "products_discussed": ["CardioPlus"],
-    "samples_given": 3,
-    "outcome": "positive"
-  }'
-```
-
-## 🔑 Environment Variables
-
-### Backend (.env)
-| Variable | Description | Default |
+### Required for Production
+| Variable | Description | Example |
 |----------|-------------|---------|
-| DATABASE_URL | PostgreSQL connection string | postgresql://postgres:postgres@localhost:5432/crm_hcp |
-| GROQ_API_KEY | Groq API key | (required) |
-| GROQ_MODEL | LLM model | gemma2-9b-it |
-| CORS_ORIGINS | Allowed CORS origins | http://localhost:3000,http://localhost:5173 |
-| LOG_LEVEL | Logging level | INFO |
-| DEBUG | Debug mode | false |
+| `DATABASE_URL` | PostgreSQL connection string | `postgresql://user:pass@host/db` |
+| `GROQ_API_KEY` | Groq LLM API key | `gsk_...` |
+| `SECRET_KEY` | Application secret key | `random-secret-string` |
+| `CORS_ORIGINS` | Allowed frontend origins | `https://app.onrender.com` |
 
-### Frontend (.env)
-| Variable | Description | Default |
-|----------|-------------|---------|
-| VITE_API_BASE_URL | Backend API URL | /api/v1 |
+### Optional
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `DEBUG` | `false` | Enable debug mode |
+| `LOG_LEVEL` | `INFO` | Logging level (DEBUG, INFO, WARNING, ERROR) |
+| `TRUSTED_HOSTS` | `localhost,127.0.0.1,.onrender.com` | Allowed hostnames |
+| `GROQ_MODEL` | `gemma2-9b-it` | Groq model to use |
+| `HOST` | `0.0.0.0` | Server bind host |
+| `PORT` | `8000` | Server bind port |
 
-## 🧠 LangGraph Workflow
+## Troubleshooting
 
-The AI extraction uses a stateful LangGraph workflow:
+### Database Connection Issues
+- Verify DATABASE_URL is correct
+- Check database is running and accessible
+- Ensure SSL mode is enabled for NeonDB
 
-```
-START
-  │
-  ▼
-Validate Input ──→ Invalid → END (with error)
-  │ Valid
-  ▼
-Context Builder (analyzes message for doctor, hospital, dates, etc.)
-  │
-  ▼
-Prompt Builder (constructs LLM prompt with system instructions)
-  │
-  ▼
-Groq LLM Call (gemma2-9b-it with temperature=0.1)
-  │
-  ▼
-JSON Extractor (parses LLM response, handles markdown)
-  │
-  ▼
-Validation Node (normalizes dates, validates enums, ensures types)
-  │
-  ├── Success → END (return structured data)
-  │
-  └── Failure → Retry (up to 2 times) → END
-```
+### CORS Errors
+- Update CORS_ORIGINS in backend/.env
+- Ensure frontend URL matches exactly (including https://)
+- Redeploy backend after changes
 
-## 📊 Database Schema
+### Build Failures
+- Check Python version (should be 3.12)
+- Verify all dependencies in requirements.txt
+- Check build logs in Render dashboard
 
-### HCP Table
-```sql
-CREATE TABLE hcp (
-    id SERIAL PRIMARY KEY,
-    doctor_name VARCHAR(255) NOT NULL,
-    hospital VARCHAR(255) NOT NULL,
-    specialization VARCHAR(255),
-    created_at TIMESTAMP DEFAULT NOW()
-);
-CREATE INDEX idx_hcp_doctor_name ON hcp(doctor_name);
-```
+### Application Errors
+- Check Render logs for detailed error messages
+- Verify all environment variables are set
+- Test health endpoint: `/api/v1/health`
 
-### Interaction Table
-```sql
-CREATE TABLE interaction (
-    id SERIAL PRIMARY KEY,
-    hcp_id INTEGER REFERENCES hcp(id) ON DELETE CASCADE,
-    meeting_date TIMESTAMP NOT NULL DEFAULT NOW(),
-    interaction_type VARCHAR(50) DEFAULT 'in_person',
-    products_discussed JSON DEFAULT '[]',
-    samples_given INTEGER DEFAULT 0,
-    outcome VARCHAR(50),
-    follow_up_date TIMESTAMP,
-    notes TEXT,
-    ai_summary TEXT,
-    ai_raw_response JSON,
-    created_at TIMESTAMP DEFAULT NOW()
-);
-CREATE INDEX idx_interaction_hcp_id ON interaction(hcp_id);
-```
+## API Endpoints
 
-## 🎯 Usage Flow
+### Health Check
+- `GET /api/v1/health` - Service health status
 
-1. **Dashboard**: View quick stats, recent interactions, and recent doctors
-2. **Log Interaction**: Choose between AI Chat or Manual Form mode
-3. **AI Chat Mode**: 
-   - Type naturally: "Met with Dr. Sharma at Apollo Hospital..."
-   - AI extracts structured data using LangGraph + Groq
-   - Form auto-populates with extracted data
-   - Review and edit fields
-   - Click Save
-4. **Manual Form Mode**: Fill all fields directly
-5. **History**: Browse, search, and export all interactions
+### Chat/AI
+- `POST /api/v1/chat` - Process natural language interaction
 
-## 🤝 Contributing
+### Interactions
+- `POST /api/v1/interaction` - Create new interaction
+- `GET /api/v1/interaction/{id}` - Get interaction by ID
+- `GET /api/v1/interaction/history` - Get interaction history
 
-1. Fork the repository
-2. Create a feature branch
-3. Commit your changes
-4. Push to the branch
-5. Open a Pull Request
+### HCPs (Healthcare Professionals)
+- `GET /api/v1/hcp` - List all HCPs
+- `GET /api/v1/hcp/recent` - Get recent HCPs
+- `GET /api/v1/hcp/{id}` - Get HCP by ID
+- `GET /api/v1/hcp/{id}/interactions` - Get HCP interactions
 
-## 📝 License
+## Support
+For issues or questions, check the Render deployment logs or contact the development team.
 
-MIT License - see LICENSE file for details.
-
-## 🙏 Acknowledgments
-
-- LangGraph for stateful AI workflows
-- Groq for high-performance LLM inference
-- Material UI for the component library
-- FastAPI for the async Python backend
-=======
-# CRM
-this app is for project use only
->>>>>>> b7de9c8518d034b049dbe4eff4bc95bee16b3362
+## License
+Proprietary - Pharma CRM HCP Interaction Module

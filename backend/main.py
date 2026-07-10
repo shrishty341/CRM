@@ -10,6 +10,7 @@ from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 
 from api.routes import router
 from database.config import init_db
@@ -63,10 +64,13 @@ app = FastAPI(
     openapi_url="/openapi.json",
 )
 
+# Add GZip compression middleware
+app.add_middleware(GZipMiddleware, minimum_size=1000)
+
 # CORS middleware configuration
 CORS_ORIGINS = os.getenv(
     "CORS_ORIGINS",
-    "http://localhost:3000,http://localhost:5173,http://localhost:8000"
+    "http://localhost:3000,http://localhost:5173"
 ).split(",")
 
 app.add_middleware(
@@ -85,10 +89,15 @@ app.add_middleware(
     max_age=600,
 )
 
-# Trusted host middleware
+# Trusted host middleware - configure for production
+TRUSTED_HOSTS = os.getenv(
+    "TRUSTED_HOSTS",
+    "localhost,127.0.0.1,.onrender.com"
+).split(",")
+
 app.add_middleware(
     TrustedHostMiddleware,
-    allowed_hosts=["*"],
+    allowed_hosts=[host.strip() for host in TRUSTED_HOSTS],
 )
 
 # Include API routes
@@ -160,4 +169,5 @@ if __name__ == "__main__":
         port=port,
         reload=debug,
         log_level="info",
+        access_log=True,
     )
