@@ -12,8 +12,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 
-from api.routes import router
-from database.config import init_db
+from .api.routes import router
+from .database.config import init_db
 
 load_dotenv()
 

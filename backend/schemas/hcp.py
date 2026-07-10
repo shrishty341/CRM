@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field, ConfigDict
 
+# Re-export for backward compatibility
+__all__ = ['HCPSchema', 'HCPCreateSchema', 'HCPSearchSchema']
+
 
 class HCPSchema(BaseModel):
     """Base HCP schema with all fields."""

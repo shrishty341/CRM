@@ -50,6 +50,5 @@ def init_db() -> None:
     Initialize database tables.
     Should be called on application startup.
     """
-    import backend.models.hcp  # noqa: F401
-    import backend.models.interaction  # noqa: F401
+    from ..models import hcp, interaction  # noqa: F401
     Base.metadata.create_all(bind=engine)

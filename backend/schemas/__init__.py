@@ -1,11 +1,11 @@
-from schemas.hcp import HCPSchema, HCPCreateSchema, HCPSearchSchema
-from schemas.interaction import (
+from .hcp import HCPSchema, HCPCreateSchema, HCPSearchSchema
+from .interaction import (
     InteractionSchema,
     InteractionCreateSchema,
     InteractionResponseSchema,
     InteractionHistorySchema,
 )
-from schemas.chat import ChatRequestSchema, ChatResponseSchema, AIExtractedData
+from .chat import ChatRequestSchema, ChatResponseSchema, AIExtractedData
 
 __all__ = [
     "HCPSchema",

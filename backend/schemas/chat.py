@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field
 
+# Re-export for backward compatibility
+__all__ = ['ChatRequestSchema', 'AIExtractedData', 'ChatResponseSchema']
+
 
 class ChatRequestSchema(BaseModel):
     """Schema for incoming chat messages."""

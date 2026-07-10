@@ -5,6 +5,9 @@ from datetime import datetime
 from typing import Optional, List
 from pydantic import BaseModel, Field, ConfigDict
 
+# Re-export for backward compatibility
+__all__ = ['InteractionSchema', 'InteractionCreateSchema', 'InteractionResponseSchema', 'InteractionHistorySchema']
+
 
 class InteractionSchema(BaseModel):
     """Base Interaction schema with all fields."""
