@@ -22,7 +22,3 @@ httpx==0.25.2
 
 # Production Server
 gunicorn==21.2.0
-
-# Utilities
-pytest==7.4.3
-pytest-asyncio==0.23.2
