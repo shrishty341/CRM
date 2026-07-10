@@ -10,15 +10,20 @@ import {
   CardContent,
   MenuItem,
   Chip,
-  Autocomplete,
-  Alert,
-  Snackbar,
-  CircularProgress,
+  RadioGroup,
+  Radio,
+  FormControlLabel,
+  FormControl,
+  FormLabel,
   Divider,
-  FormHelperText,
+  InputAdornment,
+  IconButton,
+  CircularProgress,
 } from '@mui/material';
 import SaveIcon from '@mui/icons-material/Save';
 import RestartAltIcon from '@mui/icons-material/RestartAlt';
+import SearchIcon from '@mui/icons-material/Search';
+import AddIcon from '@mui/icons-material/Add';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import { toast } from 'react-toastify';
 import { useAppDispatch, useAppSelector } from '@/hooks/useAppDispatch';
@@ -63,12 +68,15 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
     reset,
     setValue,
     watch,
-    formState: { errors, isDirty },
+    formState: { errors },
   } = useForm<InteractionFormData>({
     defaultValues: defaultFormValues,
   });
 
   const productsValue = watch('products_discussed');
+  const [sentiment, setSentiment] = React.useState('positive');
+  const [materials, setMaterials] = React.useState<string[]>([]);
+  const [samples, setSamples] = React.useState<{ name: string; quantity: number }[]>([]);
 
   // Populate form from AI extracted data
   useEffect(() => {
@@ -115,6 +123,9 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
         autoClose: 3000,
       });
       reset(defaultFormValues);
+      setSentiment('positive');
+      setMaterials([]);
+      setSamples([]);
       dispatch(setExtractedData(null));
       dispatch(clearSaveSuccess());
     }
@@ -161,6 +172,9 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
 
   const handleReset = () => {
     reset(defaultFormValues);
+    setSentiment('positive');
+    setMaterials([]);
+    setSamples([]);
     dispatch(setExtractedData(null));
     toast.info('Form has been reset');
   };
@@ -172,6 +186,21 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
         current.push(value);
         setValue('products_discussed', current.join(', '), { shouldDirty: true });
       }
+    }
+  };
+
+  const handleAddMaterial = () => {
+    const newMaterial = prompt('Enter material name:');
+    if (newMaterial && !materials.includes(newMaterial)) {
+      setMaterials([...materials, newMaterial]);
+    }
+  };
+
+  const handleAddSample = () => {
+    const sampleName = prompt('Enter sample name:');
+    const quantity = prompt('Enter quantity:');
+    if (sampleName && quantity) {
+      setSamples([...samples, { name: sampleName, quantity: parseInt(quantity) || 0 }]);
     }
   };
 
@@ -187,21 +216,12 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
             mb: 3,
           }}
         >
-          <Box>
-            <Typography variant="h6" sx={{ fontWeight: 600 }}>
-              Interaction Details
-            </Typography>
-            {extractedData && mode === 'chat' && (
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5, mt: 0.5 }}>
-                <AutoAwesomeIcon sx={{ fontSize: 14, color: 'secondary.main' }} />
-                <Typography variant="caption" color="secondary.main">
-                  AI-populated fields - review and edit before saving
-                </Typography>
-              </Box>
-            )}
-          </Box>
+          <Typography variant="h6" sx={{ fontWeight: 600 }}>
+            Log Interaction
+          </Typography>
           {extractedData && extractedData.confidence_score && (
             <Chip
+              icon={<AutoAwesomeIcon />}
               label={`AI Confidence: ${(extractedData.confidence_score * 100).toFixed(0)}%`}
               size="small"
               color={
@@ -213,8 +233,193 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
         </Box>
 
         <form onSubmit={handleSubmit(onSubmit)}>
-          <Grid container spacing={2.5}>
-            {/* Doctor Name */}
+          <Grid container spacing={3}>
+            {/* Topics Discussed */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Topics Discussed
+              </Typography>
+              <Controller
+                name="notes"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    placeholder="Product X efficiency..."
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={3}
+                    sx={{
+                      '& .MuiOutlinedInput-root': {
+                        bgcolor: 'grey.50',
+                      },
+                    }}
+                  />
+                )}
+              />
+              <Box sx={{ mt: 1 }}>
+                <Typography
+                  variant="caption"
+                  color="primary.main"
+                  sx={{ cursor: 'pointer', textDecoration: 'underline' }}
+                >
+                  📝 Summarize from Voice Note (Requires Consent)
+                </Typography>
+              </Box>
+            </Grid>
+
+            {/* Materials Shared / Samples Distributed */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                Materials Shared / Samples Distributed
+              </Typography>
+
+              {/* Materials Shared */}
+              <Box sx={{ mb: 2 }}>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Materials Shared
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <TextField
+                    placeholder="Brochures"
+                    size="small"
+                    sx={{ flex: 1 }}
+                    value={materials.join(', ')}
+                    onChange={(e) => setMaterials(e.target.value.split(',').map(m => m.trim()).filter(Boolean))}
+                  />
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<SearchIcon />}
+                    onClick={handleAddMaterial}
+                  >
+                    Search/Add
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Samples Distributed */}
+              <Box>
+                <Typography variant="body2" sx={{ fontWeight: 500, mb: 1 }}>
+                  Samples Distributed
+                </Typography>
+                <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
+                  <TextField
+                    placeholder="No samples added"
+                    size="small"
+                    sx={{ flex: 1 }}
+                    value={samples.map(s => `${s.name} (${s.quantity})`).join(', ') || ''}
+                    onChange={(e) => {
+                      const text = e.target.value;
+                      if (!text) setSamples([]);
+                    }}
+                  />
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={handleAddSample}
+                  >
+                    Add Sample
+                  </Button>
+                </Box>
+              </Box>
+            </Grid>
+
+            {/* Observed/Inferred HCP Sentiment */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 2 }}>
+                Observed/Inferred HCP Sentiment
+              </Typography>
+              <FormControl>
+                <RadioGroup
+                  row
+                  value={sentiment}
+                  onChange={(e) => setSentiment(e.target.value)}
+                >
+                  <FormControlLabel
+                    value="positive"
+                    control={<Radio />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        😊 Positive
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    value="neutral"
+                    control={<Radio />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        😐 Neutral
+                      </Box>
+                    }
+                  />
+                  <FormControlLabel
+                    value="negative"
+                    control={<Radio />}
+                    label={
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        😟 Negative
+                      </Box>
+                    }
+                  />
+                </RadioGroup>
+              </FormControl>
+            </Grid>
+
+            {/* Outcomes */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Outcomes
+              </Typography>
+              <Controller
+                name="outcome"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    placeholder="Key outcomes or agreements..."
+                    fullWidth
+                    size="small"
+                    multiline
+                    rows={2}
+                    select
+                  >
+                    <MenuItem value="">Select Outcome</MenuItem>
+                    {OUTCOME_OPTIONS.map((opt) => (
+                      <MenuItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </MenuItem>
+                    ))}
+                  </TextField>
+                )}
+              />
+            </Grid>
+
+            {/* Follow-up Actions */}
+            <Grid item xs={12}>
+              <Typography variant="subtitle2" sx={{ fontWeight: 600, mb: 1 }}>
+                Follow-up Actions
+              </Typography>
+              <Controller
+                name="follow_up_date"
+                control={control}
+                render={({ field }) => (
+                  <TextField
+                    {...field}
+                    label="Follow-up Date"
+                    type="date"
+                    fullWidth
+                    size="small"
+                    InputLabelProps={{ shrink: true }}
+                  />
+                )}
+              />
+            </Grid>
+
+            {/* Doctor and Hospital Info */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="doctor_name"
@@ -229,26 +434,17 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Doctor Name *"
+                    label="HCP Name"
                     placeholder="e.g., Dr. Rajesh Sharma"
                     fullWidth
                     size="small"
                     error={!!errors.doctor_name}
                     helperText={errors.doctor_name?.message}
-                    InputProps={{
-                      sx: {
-                        bgcolor: extractedData?.doctor_name ? 'success.light' : 'transparent',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: extractedData?.doctor_name ? 'success.main' : undefined,
-                        },
-                      },
-                    }}
                   />
                 )}
               />
             </Grid>
 
-            {/* Hospital */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="hospital"
@@ -259,55 +455,18 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Hospital *"
+                    label="Hospital"
                     placeholder="e.g., Apollo Hospital"
                     fullWidth
                     size="small"
                     error={!!errors.hospital}
                     helperText={errors.hospital?.message}
-                    InputProps={{
-                      sx: {
-                        bgcolor: extractedData?.hospital ? 'success.light' : 'transparent',
-                        '& .MuiOutlinedInput-notchedOutline': {
-                          borderColor: extractedData?.hospital ? 'success.main' : undefined,
-                        },
-                      },
-                    }}
                   />
                 )}
               />
             </Grid>
 
-            {/* Specialization */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="specialization"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Specialization"
-                    fullWidth
-                    size="small"
-                    InputProps={{
-                      sx: {
-                        bgcolor: extractedData?.specialization ? 'success.light' : 'transparent',
-                      },
-                    }}
-                  >
-                    <MenuItem value="">Select Specialization</MenuItem>
-                    {SPECIALIZATION_OPTIONS.map((spec) => (
-                      <MenuItem key={spec} value={spec}>
-                        {spec}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-
-            {/* Meeting Date */}
+            {/* Meeting Date and Type */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="meeting_date"
@@ -316,7 +475,7 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
                 render={({ field }) => (
                   <TextField
                     {...field}
-                    label="Meeting Date *"
+                    label="Date of Interaction"
                     type="date"
                     fullWidth
                     size="small"
@@ -328,7 +487,6 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
               />
             </Grid>
 
-            {/* Interaction Type */}
             <Grid item xs={12} sm={6}>
               <Controller
                 name="interaction_type"
@@ -351,197 +509,44 @@ const InteractionForm: React.FC<Props> = ({ mode }) => {
               />
             </Grid>
 
-            {/* Samples Given */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="samples_given"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Samples Given"
-                    type="number"
-                    fullWidth
-                    size="small"
-                    onChange={(e) =>
-                      field.onChange(
-                        e.target.value ? parseInt(e.target.value, 10) : 0
-                      )
-                    }
-                    InputProps={{
-                      inputProps: { min: 0, max: 1000 },
-                      sx: {
-                        bgcolor:
-                          extractedData?.samples_given !== null &&
-                          extractedData?.samples_given !== undefined
-                            ? 'success.light'
-                            : 'transparent',
-                      },
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Products Discussed */}
+            {/* Action Buttons */}
             <Grid item xs={12}>
-              <Controller
-                name="products_discussed"
-                control={control}
-                render={({ field }) => (
-                  <Box>
-                    <TextField
-                      {...field}
-                      label="Products Discussed"
-                      placeholder="e.g., CardioPlus, NeuroMax (comma separated)"
-                      fullWidth
-                      size="small"
-                      multiline
-                      rows={2}
-                      InputProps={{
-                        sx: {
-                          bgcolor:
-                            extractedData?.products_discussed &&
-                            extractedData.products_discussed.length > 0
-                              ? 'success.light'
-                              : 'transparent',
-                        },
-                      }}
-                    />
-                    <Box sx={{ mt: 1, display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                      {PRODUCT_OPTIONS.map((product) => {
-                        const isSelected = field.value
-                          ?.split(',')
-                          .map((p) => p.trim())
-                          .includes(product);
-                        return (
-                          <Chip
-                            key={product}
-                            label={product}
-                            size="small"
-                            variant={isSelected ? 'filled' : 'outlined'}
-                            color={isSelected ? 'primary' : 'default'}
-                            onClick={() => handleProductSelect(null, product)}
-                            sx={{ cursor: 'pointer' }}
-                          />
-                        );
-                      })}
-                    </Box>
-                  </Box>
-                )}
-              />
-            </Grid>
-
-            {/* Outcome */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="outcome"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    select
-                    label="Meeting Outcome"
-                    fullWidth
-                    size="small"
-                    InputProps={{
-                      sx: {
-                        bgcolor: extractedData?.outcome ? 'success.light' : 'transparent',
-                      },
-                    }}
-                  >
-                    <MenuItem value="">Select Outcome</MenuItem>
-                    {OUTCOME_OPTIONS.map((opt) => (
-                      <MenuItem key={opt.value} value={opt.value}>
-                        {opt.label}
-                      </MenuItem>
-                    ))}
-                  </TextField>
-                )}
-              />
-            </Grid>
-
-            {/* Follow-up Date */}
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="follow_up_date"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Follow-up Date"
-                    type="date"
-                    fullWidth
-                    size="small"
-                    InputLabelProps={{ shrink: true }}
-                    InputProps={{
-                      sx: {
-                        bgcolor: extractedData?.follow_up_date
-                          ? 'success.light'
-                          : 'transparent',
-                      },
-                    }}
-                  />
-                )}
-              />
-            </Grid>
-
-            {/* Notes / AI Summary */}
-            <Grid item xs={12}>
-              <Controller
-                name="notes"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    label="Notes / Summary"
-                    placeholder="Additional notes about the interaction..."
-                    fullWidth
-                    size="small"
-                    multiline
-                    rows={3}
-                  />
-                )}
-              />
+              <Divider sx={{ my: 2 }} />
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'flex-end',
+                  gap: 2,
+                }}
+              >
+                <Button
+                  variant="outlined"
+                  color="inherit"
+                  startIcon={<RestartAltIcon />}
+                  onClick={handleReset}
+                  disabled={isLoading}
+                >
+                  Reset
+                </Button>
+                <Button
+                  type="submit"
+                  variant="contained"
+                  color="primary"
+                  startIcon={
+                    isLoading ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : (
+                      <SaveIcon />
+                    )
+                  }
+                  disabled={isLoading}
+                  sx={{ minWidth: 140 }}
+                >
+                  {isLoading ? 'Saving...' : 'Save Interaction'}
+                </Button>
+              </Box>
             </Grid>
           </Grid>
-
-          <Divider sx={{ my: 3 }} />
-
-          {/* Action Buttons */}
-          <Box
-            sx={{
-              display: 'flex',
-              justifyContent: 'flex-end',
-              gap: 2,
-            }}
-          >
-            <Button
-              variant="outlined"
-              color="inherit"
-              startIcon={<RestartAltIcon />}
-              onClick={handleReset}
-              disabled={isLoading}
-            >
-              Reset
-            </Button>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              startIcon={
-                isLoading ? (
-                  <CircularProgress size={18} color="inherit" />
-                ) : (
-                  <SaveIcon />
-                )
-              }
-              disabled={isLoading}
-              sx={{ minWidth: 140 }}
-            >
-              {isLoading ? 'Saving...' : 'Save Interaction'}
-            </Button>
-          </Box>
         </form>
       </CardContent>
     </Card>

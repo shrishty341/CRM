@@ -89,29 +89,21 @@ const LogInteraction: React.FC = () => {
       {/* Two-Panel Layout */}
       <Box sx={{ flex: 1, overflow: 'hidden' }}>
         <Grid container spacing={2} sx={{ height: '100%' }}>
-          {/* Left Panel - Chat (only in chat mode) */}
-          {mode === 'chat' && (
-            <Grid
-              item
-              xs={12}
-              md={showForm ? 6 : 12}
-              sx={{ height: '100%', overflow: 'hidden' }}
-            >
-              <ChatPanel />
-            </Grid>
-          )}
+          {/* Left Panel - Chat */}
+          <Grid
+            item
+            xs={12}
+            md={6}
+            sx={{ height: '100%', overflow: 'hidden', display: mode === 'form' ? 'none' : 'block' }}
+          >
+            {mode === 'chat' && <ChatPanel />}
+          </Grid>
 
           {/* Right Panel - Form */}
           <Grid
             item
             xs={12}
-            md={
-              mode === 'chat'
-                ? showForm
-                  ? 6
-                  : 12
-                : 12
-            }
+            md={6}
             sx={{ height: '100%', overflow: 'auto' }}
           >
             <InteractionForm mode={mode} />

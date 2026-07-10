@@ -101,36 +101,34 @@ const ChatPanel: React.FC = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between',
-          bgcolor: 'secondary.main',
+          bgcolor: 'primary.main',
           color: 'white',
         }}
       >
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-          <Avatar sx={{ bgcolor: 'white', color: 'secondary.main' }}>
-            <SmartToyIcon />
+          <Avatar sx={{ bgcolor: 'white', color: 'primary.main', width: 32, height: 32 }}>
+            <SmartToyIcon sx={{ fontSize: 20 }} />
           </Avatar>
           <Box>
-            <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
-              AI Chat Assistant
+            <Typography variant="subtitle2" sx={{ fontWeight: 600, fontSize: '0.95rem' }}>
+              AI Assistant
             </Typography>
-            <Typography variant="caption" sx={{ opacity: 0.9 }}>
-              {isProcessing ? 'Processing...' : 'Describe your interaction'}
+            <Typography variant="caption" sx={{ opacity: 0.9, fontSize: '0.75rem' }}>
+              Log interaction details here via chat
             </Typography>
           </Box>
         </Box>
-        <Box sx={{ display: 'flex', gap: 0.5 }}>
-          {messages.length > 0 && (
-            <Tooltip title="Clear chat">
-              <IconButton
-                size="small"
-                sx={{ color: 'white' }}
-                onClick={handleClearChat}
-              >
-                <DeleteSweepIcon fontSize="small" />
-              </IconButton>
-            </Tooltip>
-          )}
-        </Box>
+        {messages.length > 0 && (
+          <Tooltip title="Clear chat">
+            <IconButton
+              size="small"
+              sx={{ color: 'white' }}
+              onClick={handleClearChat}
+            >
+              <DeleteSweepIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
 
       {/* Messages Area */}
@@ -155,7 +153,7 @@ const ChatPanel: React.FC = () => {
             }}
           >
             <SmartToyIcon
-              sx={{ fontSize: 64, color: 'secondary.light', mb: 2 }}
+              sx={{ fontSize: 64, color: 'primary.light', mb: 2 }}
             />
             <Typography variant="h6" sx={{ mb: 1 }}>
               How can I help you?
@@ -167,7 +165,7 @@ const ChatPanel: React.FC = () => {
             <Chip
               icon={<AutoAwesomeIcon />}
               label="Powered by LangGraph + Groq LLM"
-              color="secondary"
+              color="primary"
               variant="outlined"
               size="small"
             />
@@ -189,7 +187,7 @@ const ChatPanel: React.FC = () => {
                 sx={{
                   width: 32,
                   height: 32,
-                  bgcolor: 'secondary.main',
+                  bgcolor: 'primary.main',
                   mt: 0.5,
                 }}
               >
@@ -305,7 +303,7 @@ const ChatPanel: React.FC = () => {
               sx={{
                 width: 32,
                 height: 32,
-                bgcolor: 'secondary.main',
+                bgcolor: 'primary.main',
               }}
             >
               <SmartToyIcon sx={{ fontSize: 18 }} />
@@ -323,7 +321,7 @@ const ChatPanel: React.FC = () => {
                 gap: 1,
               }}
             >
-              <CircularProgress size={16} color="secondary" />
+              <CircularProgress size={16} color="primary" />
               <Typography variant="body2" color="text.secondary">
                 Analyzing your message...
               </Typography>
@@ -361,9 +359,9 @@ const ChatPanel: React.FC = () => {
                 sx={{
                   cursor: 'pointer',
                   '&:hover': {
-                    bgcolor: 'secondary.light',
+                    bgcolor: 'primary.light',
                     color: 'white',
-                    borderColor: 'secondary.light',
+                    borderColor: 'primary.light',
                   },
                 }}
               />
@@ -385,7 +383,7 @@ const ChatPanel: React.FC = () => {
           <TextField
             fullWidth
             inputRef={inputRef}
-            placeholder="Describe your interaction... (e.g., 'Met with Dr. Sharma at Apollo...')"
+            placeholder="Log interaction details here (e.g., 'Met Dr. Smith, discussed Product X efficiency, positive sentiment, shared brochure') or ask for help."
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyPress={handleKeyPress}
@@ -401,15 +399,15 @@ const ChatPanel: React.FC = () => {
             }}
           />
           <IconButton
-            color="secondary"
+            color="primary"
             onClick={handleSend}
             disabled={!input.trim() || isProcessing}
             sx={{
               alignSelf: 'flex-end',
-              bgcolor: input.trim() ? 'secondary.main' : 'grey.300',
+              bgcolor: input.trim() ? 'primary.main' : 'grey.300',
               color: 'white',
               '&:hover': {
-                bgcolor: 'secondary.dark',
+                bgcolor: 'primary.dark',
               },
               '&.Mui-disabled': {
                 bgcolor: 'grey.300',
@@ -424,13 +422,6 @@ const ChatPanel: React.FC = () => {
             )}
           </IconButton>
         </Box>
-        <Typography
-          variant="caption"
-          color="text.disabled"
-          sx={{ display: 'block', mt: 0.5, textAlign: 'right' }}
-        >
-          Press Enter to send • Shift+Enter for new line
-        </Typography>
       </Box>
     </Card>
   );
